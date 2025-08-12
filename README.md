@@ -10,7 +10,7 @@ app_file: space.py
 ---
 
 # `gradio_imagemeta`
-<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.1%20-%20orange">  
+<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.1%20-%20blue"> <a href="https://huggingface.co/spaces/elismasilva/gradio_imagemeta"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue"></a><p><span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_imagemeta'>Component GitHub Code</a></span></p>
 
 Image Preview with Metadata for Gradio Interface
 
