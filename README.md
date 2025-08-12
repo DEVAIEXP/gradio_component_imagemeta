@@ -14,6 +14,18 @@ app_file: space.py
 
 Image Preview with Metadata for Gradio Interface
 
+Imagine loading a photo with embedded presets (e.g., camera settings or AI model parameters) and instantly populating your app’s UI with those values. With ImageMeta, you can extract and apply these presets effortlessly, streamlining workflows for photographers, data scientists, or creative professionals.
+
+# Features and Key Characteristics
+
+**ImageMeta** is a custom Gradio component designed to enhance image handling with robust metadata support. Key features include:
+
+- **Interactive Image Upload**: Upload PNG/JPEG images via drag-and-drop or file selection, with real-time metadata extraction using `exifr` on the client side.
+- **Metadata Extraction & Display**: View EXIF, IPTC, and XMP metadata in a customizable popup, with options to filter custom metadata (e.g., `Model`, `Schurn`) or include technical details (e.g., `ImageWidth`).
+- **Preset Loading**: Load metadata directly into UI components (Textbox, Slider, PropertySheet) to apply saved presets, streamlining workflows like camera settings or AI model parameters.
+- **Metadata Editing & Saving**: Add or update metadata and save images with embedded metadata for downstream use, powered by PIL on the server side.
+- **Responsive Design**: Supports fullscreen mode, adjustable popup sizes, and a polished Svelte-based UI for seamless user experiences.
+
 ## Installation
 
 ```bash

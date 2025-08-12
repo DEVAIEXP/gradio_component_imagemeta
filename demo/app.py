@@ -27,26 +27,6 @@ class PropertyConfig:
     image_settings: ImageSettings = field(default_factory=ImageSettings)
     description: str = field(default="", metadata={"label": "Description"})
 
-def process_example_images(img_custom_path: str, img_all_path: str) -> tuple[str, str]:
-    """
-    Processes example image paths for display in ImageMeta components.
-
-    Args:
-        img_custom_path: File path for the image to display in img_custom.
-        img_all_path: File path for the image to display in img_all.
-
-    Returns:
-        Tuple of file paths for img_custom and img_all outputs.
-    """
-    # Verify file existence
-    if not Path(img_custom_path.path).is_file():
-        raise FileNotFoundError(f"Image not found: {img_custom_path}")
-    if not Path(img_all_path.path).is_file():
-        raise FileNotFoundError(f"Image not found: {img_all_path}")
-    
-    # Return file paths as strings (ImageMeta accepts file paths as input)
-    return img_custom_path.path, img_all_path.path
-
 def handle_load_metadata(image_data: ImageMeta | None) -> List[Any]:
     """
     Processes image metadata and maps it to output components.
@@ -118,7 +98,7 @@ with gr.Blocks() as demo:
             type="filepath",
             width=300,
             height=400,            
-            interactive=False
+            interactive=True
         )
         img_all = ImageMeta(
             label="Upload Image (All metadata)",
@@ -128,7 +108,7 @@ with gr.Blocks() as demo:
             height=400,            
             popup_metadata_height=400,
             popup_metadata_width=500,
-            interactive=False
+            interactive=True
         )
 
     gr.Markdown("## Metadata Viewer")
@@ -154,17 +134,7 @@ with gr.Blocks() as demo:
     with gr.Row():
         save_button = gr.Button("Add Metadata and Save Image")
         saved_file_output = gr.File(label="Download Image")
-    
-    with gr.Row():
-        gr.Examples(
-            examples=[
-                ["./examples/image_with_meta.png", "./examples/image_with_meta.png"]
-            ],
-            fn=process_example_images,
-            inputs=[img_custom, img_all],
-            outputs=[img_custom, img_all],
-            cache_examples=True
-        )
+   
         
     input_fields = {
         "Model": model_box,

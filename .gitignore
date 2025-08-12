@@ -13,3 +13,4 @@ __tmp/*
 node_modules
 backend/**/templates/
 outputs/
+README_TEMPLATE.md

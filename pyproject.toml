@@ -38,8 +38,8 @@ classifiers = [
 # encounter your project in the wild.
 
 # [project.urls]
-# repository = "your github repository"
-# space = "your space url"
+# repository = "https://github.com/DEVAIEXP/gradio_component_imagemeta"
+# space = "https://huggingface.co/spaces/elismasilva/gradio_imagemeta"
 
 [project.optional-dependencies]
 dev = ["build", "twine"]
