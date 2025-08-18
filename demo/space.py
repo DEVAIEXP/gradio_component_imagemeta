@@ -21,7 +21,7 @@ with gr.Blocks(
 # `gradio_imagemeta`
 
 <div style="display: flex; gap: 7px;">
-<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.1%20-%20orange">  
+<a href="https://pypi.org/project/gradio_imagemeta/" target="_blank"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/gradio_imagemeta"></a>  
 </div>
 
 Image Preview with Metadata for Gradio Interface
@@ -47,6 +47,7 @@ from gradio_propertysheet import PropertySheet
 from gradio_propertysheet.helpers import build_dataclass_fields, create_dataclass_instance
 from pathlib import Path
 
+
 output_dir = Path("outputs")
 output_dir.mkdir(exist_ok=True)
 
@@ -67,25 +68,50 @@ class PropertyConfig:
     image_settings: ImageSettings = field(default_factory=ImageSettings)
     description: str = field(default="", metadata={"label": "Description"})
 
-def process_example_images(img_custom_path: str, img_all_path: str) -> tuple[str, str]:
+def infer_type(s: str):
     \"\"\"
-    Processes example image paths for display in ImageMeta components.
+    Infers and converts a string to the most likely data type.
+
+    It attempts conversions in the following order:
+    1. Integer
+    2. Float
+    3. Boolean (case-insensitive 'true' or 'false')
+    If all conversions fail, it returns the original string.
 
     Args:
-        img_custom_path: File path for the image to display in img_custom.
-        img_all_path: File path for the image to display in img_all.
+        s: The input string to be converted.
 
     Returns:
-        Tuple of file paths for img_custom and img_all outputs.
+        The converted value (int, float, bool) or the original string.
     \"\"\"
-    # Verify file existence
-    if not Path(img_custom_path).is_file():
-        raise FileNotFoundError(f"Image not found: {img_custom_path}")
-    if not Path(img_all_path).is_file():
-        raise FileNotFoundError(f"Image not found: {img_all_path}")
+    if not isinstance(s, str):
+        # If the input is not a string, return it as is.
+        return s
+
+    # 1. Try to convert to an integer
+    try:
+        return int(s)
+    except ValueError:
+        # Not an integer, continue...
+        pass
+
+    # 2. Try to convert to a float
+    try:
+        return float(s)
+    except ValueError:
+        # Not a float, continue...
+        pass
     
-    # Return file paths as strings (ImageMeta accepts file paths as input)
-    return str(img_custom_path), str(img_all_path)
+    # 3. Check for a boolean value
+    # This explicit check is important because bool('False') evaluates to True.
+    s_lower = s.lower()
+    if s_lower == 'true':
+        return True
+    if s_lower == 'false':
+        return False
+        
+    # 4. If nothing else worked, return the original string
+    return s
 
 def handle_load_metadata(image_data: ImageMeta | None) -> List[Any]:
     \"\"\"
@@ -105,11 +131,11 @@ def handle_load_metadata(image_data: ImageMeta | None) -> List[Any]:
     raw_values = transfer_metadata(output_fields, metadata, dataclass_fields)
 
     output_values = [gr.skip()] * len(output_fields)
-    for i, (component, value) in enumerate(zip(output_fields, raw_values)):
+    for i, (component, value) in enumerate(zip(output_fields, raw_values)):        
         if hasattr(component, 'root_label'):
             output_values[i] = create_dataclass_instance(PropertyConfig, value)
         else:
-            output_values[i] = gr.Textbox(value=value)
+            output_values[i] = gr.update(value=infer_type(value))
     
     return output_values
 
@@ -129,10 +155,11 @@ def save_image_with_metadata(image_data: Any, *inputs: Any) -> str | None:
     
     params = list(inputs)
     image_params = dict(zip(input_fields.keys(), params))
-    dataclass_fields = build_dataclass_fields(PropertyConfig)
-    metadata = {label: image_params.get(label, "") for label in dataclass_fields.keys()}
+    #dataclass_fields = build_dataclass_fields(PropertyConfig)
+    metadata = {label: image_params.get(label, "") for label in image_params.keys()}
     
     new_filepath = output_dir / "image_with_meta.png"
+    
     add_metadata(image_data, metadata, new_filepath)
     
     return str(new_filepath)
@@ -157,17 +184,18 @@ with gr.Blocks() as demo:
             label="Upload Image (Custom metadata only)",
             type="filepath",
             width=300,
-            height=400,
-            disable_preprocess=False,
+            height=400,            
             interactive=True
         )
         img_all = ImageMeta(
             label="Upload Image (All metadata)",
             only_custom_metadata=False,
+            type="filepath",
             width=300,
-            height=400,
+            height=400,            
             popup_metadata_height=400,
-            popup_metadata_width=500
+            popup_metadata_width=500,
+            interactive=True
         )
 
     gr.Markdown("## Metadata Viewer")
@@ -193,17 +221,7 @@ with gr.Blocks() as demo:
     with gr.Row():
         save_button = gr.Button("Add Metadata and Save Image")
         saved_file_output = gr.File(label="Download Image")
-    
-    with gr.Row():
-        gr.Examples(
-            examples=[
-                ["./examples/image_with_meta.png", "./examples/image_with_meta.png"]
-            ],
-            fn=process_example_images,
-            inputs=[img_custom, img_all],
-            outputs=[img_custom, img_all],
-            cache_examples=True
-        )
+   
         
     input_fields = {
         "Model": model_box,

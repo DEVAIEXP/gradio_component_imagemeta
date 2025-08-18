@@ -355,7 +355,7 @@
     .load-metadata-button {
         margin-top: 1rem;
         padding: 0.5rem 1rem;
-        background-color: var(--button-primary-background-fill);
+        background-color: var(--button-primary-border-color);
         color: var(--button-primary-text-color);
         border: none;
         border-radius: 4px;

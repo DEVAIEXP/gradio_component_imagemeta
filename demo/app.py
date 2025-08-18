@@ -7,6 +7,7 @@ from gradio_propertysheet import PropertySheet
 from gradio_propertysheet.helpers import build_dataclass_fields, create_dataclass_instance
 from pathlib import Path
 
+
 output_dir = Path("outputs")
 output_dir.mkdir(exist_ok=True)
 
@@ -27,6 +28,51 @@ class PropertyConfig:
     image_settings: ImageSettings = field(default_factory=ImageSettings)
     description: str = field(default="", metadata={"label": "Description"})
 
+def infer_type(s: str):
+    """
+    Infers and converts a string to the most likely data type.
+
+    It attempts conversions in the following order:
+    1. Integer
+    2. Float
+    3. Boolean (case-insensitive 'true' or 'false')
+    If all conversions fail, it returns the original string.
+
+    Args:
+        s: The input string to be converted.
+
+    Returns:
+        The converted value (int, float, bool) or the original string.
+    """
+    if not isinstance(s, str):
+        # If the input is not a string, return it as is.
+        return s
+
+    # 1. Try to convert to an integer
+    try:
+        return int(s)
+    except ValueError:
+        # Not an integer, continue...
+        pass
+
+    # 2. Try to convert to a float
+    try:
+        return float(s)
+    except ValueError:
+        # Not a float, continue...
+        pass
+    
+    # 3. Check for a boolean value
+    # This explicit check is important because bool('False') evaluates to True.
+    s_lower = s.lower()
+    if s_lower == 'true':
+        return True
+    if s_lower == 'false':
+        return False
+        
+    # 4. If nothing else worked, return the original string
+    return s
+
 def handle_load_metadata(image_data: ImageMeta | None) -> List[Any]:
     """
     Processes image metadata and maps it to output components.
@@ -45,11 +91,11 @@ def handle_load_metadata(image_data: ImageMeta | None) -> List[Any]:
     raw_values = transfer_metadata(output_fields, metadata, dataclass_fields)
 
     output_values = [gr.skip()] * len(output_fields)
-    for i, (component, value) in enumerate(zip(output_fields, raw_values)):
+    for i, (component, value) in enumerate(zip(output_fields, raw_values)):        
         if hasattr(component, 'root_label'):
             output_values[i] = create_dataclass_instance(PropertyConfig, value)
         else:
-            output_values[i] = gr.Textbox(value=value)
+            output_values[i] = gr.update(value=infer_type(value))
     
     return output_values
 
@@ -68,11 +114,11 @@ def save_image_with_metadata(image_data: Any, *inputs: Any) -> str | None:
         return None
     
     params = list(inputs)
-    image_params = dict(zip(input_fields.keys(), params))
-    dataclass_fields = build_dataclass_fields(PropertyConfig)
-    metadata = {label: image_params.get(label, "") for label in dataclass_fields.keys()}
+    image_params = dict(zip(input_fields.keys(), params))    
+    metadata = {label: image_params.get(label, "") for label in image_params.keys()}
     
     new_filepath = output_dir / "image_with_meta.png"
+    
     add_metadata(image_data, metadata, new_filepath)
     
     return str(new_filepath)

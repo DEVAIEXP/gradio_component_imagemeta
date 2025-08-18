@@ -107,6 +107,7 @@ def add_metadata(image_data: str | Path | Image.Image | np.ndarray, metadata: Di
         if not bool(save_path):
             return False
         
+        
         # Convert image_data to PIL.Image
         if isinstance(image_data, (str, Path)):
             image = Image.open(image_data)
