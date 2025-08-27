@@ -154,13 +154,12 @@ def save_image_with_metadata(image_data: Any, *inputs: Any) -> str | None:
         return None
     
     params = list(inputs)
-    image_params = dict(zip(input_fields.keys(), params))
-    #dataclass_fields = build_dataclass_fields(PropertyConfig)
+    image_params = dict(zip(input_fields.keys(), params))    
     metadata = {label: image_params.get(label, "") for label in image_params.keys()}
     
     new_filepath = output_dir / "image_with_meta.png"
     
-    add_metadata(image_data, metadata, new_filepath)
+    add_metadata(image_data, new_filepath, metadata)
     
     return str(new_filepath)
 
@@ -183,18 +182,20 @@ with gr.Blocks() as demo:
         img_custom = ImageMeta(
             label="Upload Image (Custom metadata only)",
             type="filepath",
-            width=300,
+            width=600,
             height=400,            
-            interactive=True
+            popup_metadata_height=350,
+            popup_metadata_width=550,
+            interactive=True            
         )
         img_all = ImageMeta(
             label="Upload Image (All metadata)",
             only_custom_metadata=False,
             type="filepath",
-            width=300,
+            width=600,
             height=400,            
-            popup_metadata_height=400,
-            popup_metadata_width=500,
+            popup_metadata_height=350,
+            popup_metadata_width=550,
             interactive=True
         )
 

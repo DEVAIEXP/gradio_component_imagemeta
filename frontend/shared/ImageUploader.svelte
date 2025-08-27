@@ -440,7 +440,7 @@
         font-weight: bold;
         text-align: left;
         vertical-align: top;
-        width: 40%;
+        width: auto;
     }
 
     .metadata-value {

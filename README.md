@@ -10,7 +10,7 @@ app_file: space.py
 ---
 
 # `gradio_imagemeta`
-<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.1%20-%20blue"> <a href="https://huggingface.co/spaces/elismasilva/gradio_imagemeta"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue"></a><p><span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_imagemeta'>Component GitHub Code</a></span></p>
+<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.3%20-%20blue"> <a href="https://huggingface.co/spaces/elismasilva/gradio_imagemeta"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-blue"></a><p><span>💻 <a href='https://github.com/DEVAIEXP/gradio_component_imagemeta'>Component GitHub Code</a></span></p>
 
 Image Preview with Metadata for Gradio Interface
 
@@ -27,6 +27,7 @@ Imagine loading a photo with embedded presets (e.g., camera settings or AI model
 - **Responsive Design**: Supports fullscreen mode, adjustable popup sizes, and a polished Svelte-based UI for seamless user experiences.
 
 ## Installation
+
 ```bash
 pip install gradio_imagemeta
 ```
@@ -150,13 +151,12 @@ def save_image_with_metadata(image_data: Any, *inputs: Any) -> str | None:
         return None
     
     params = list(inputs)
-    image_params = dict(zip(input_fields.keys(), params))
-    #dataclass_fields = build_dataclass_fields(PropertyConfig)
+    image_params = dict(zip(input_fields.keys(), params))    
     metadata = {label: image_params.get(label, "") for label in image_params.keys()}
     
     new_filepath = output_dir / "image_with_meta.png"
     
-    add_metadata(image_data, metadata, new_filepath)
+    add_metadata(image_data, new_filepath, metadata)
     
     return str(new_filepath)
 
@@ -179,18 +179,20 @@ with gr.Blocks() as demo:
         img_custom = ImageMeta(
             label="Upload Image (Custom metadata only)",
             type="filepath",
-            width=300,
+            width=600,
             height=400,            
-            interactive=True
+            popup_metadata_height=350,
+            popup_metadata_width=550,
+            interactive=True            
         )
         img_all = ImageMeta(
             label="Upload Image (All metadata)",
             only_custom_metadata=False,
             type="filepath",
-            width=300,
+            width=600,
             height=400,            
-            popup_metadata_height=400,
-            popup_metadata_width=500,
+            popup_metadata_height=350,
+            popup_metadata_width=550,
             interactive=True
         )
 

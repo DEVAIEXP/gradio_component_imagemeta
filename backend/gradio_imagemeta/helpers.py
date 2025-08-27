@@ -1,4 +1,5 @@
 from dataclasses import fields
+import os
 from pathlib import Path
 from typing import Any, Dict, List
 from PIL import Image, PngImagePlugin, ExifTags
@@ -91,22 +92,21 @@ def preprocess_image(image_data: str | Path | Image.Image | np.ndarray, type: st
     else:
         raise ValueError(f"Unsupported type: {type}")
 
-def add_metadata(image_data: str | Path | Image.Image | np.ndarray, metadata: Dict[str, Any], save_path: str) -> bool:
+def add_metadata(image_data: str | Path | Image.Image | np.ndarray, save_path: str, metadata: Dict[str, Any]) -> bool:
     """
     Adds metadata to an image and saves it to the specified path.
 
     Args:
         image_data: Image data as a filepath, Path, PIL Image, or NumPy array.
-        metadata: Dictionary of metadata to add to the image.
         save_path: Filepath where the modified image will be saved.
+        metadata: Dictionary of metadata to add to the image.
 
     Returns:
         True if metadata was added and image was saved successfully, False otherwise.
     """
     try:
         if not bool(save_path):
-            return False
-        
+            return False        
         
         # Convert image_data to PIL.Image
         if isinstance(image_data, (str, Path)):
@@ -120,20 +120,25 @@ def add_metadata(image_data: str | Path | Image.Image | np.ndarray, metadata: Di
         else:
             return False
 
+        _, ext = os.path.splitext(save_path)
         image_copy = image.copy()
-        if image.format == "PNG":
-            meta = PngImagePlugin.PngInfo()
-            for key, value in metadata.items():
-                meta.add_text(str(key), str(value))
-            image_copy.info.update(metadata)  # For reference, but requires pnginfo when saving
+        
+        if (image.format if image.format is not None else ext.replace('.','').upper()) == "PNG":
+            meta = None
+            if metadata:
+                meta = PngImagePlugin.PngInfo()
+                for key, value in metadata.items():
+                    meta.add_text(str(key), str(value))
+                image_copy.info.update(metadata)  # For reference, but requires pnginfo when saving
             image_copy.save(save_path, pnginfo=meta)
         else:
-            exif = image_copy.getexif() or Image.Exif()
-            for key, value in metadata.items():
-                tag_id = next((k for k, v in ExifTags.TAGS.items() if v == key), None)
-                if tag_id:
-                    exif[tag_id] = value
-            image_copy.exif = exif
+            if metadata:
+                exif = image_copy.getexif() or Image.Exif()
+                for key, value in metadata.items():
+                    tag_id = next((k for k, v in ExifTags.TAGS.items() if v == key), None)
+                    if tag_id:
+                        exif[tag_id] = value
+                image_copy.exif = exif
             image_copy.save(save_path)    
         return True
     except Exception:

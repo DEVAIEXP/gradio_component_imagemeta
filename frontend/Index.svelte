@@ -169,6 +169,8 @@
             {show_share_button}
             i18n={gradio.i18n}
             {show_fullscreen_button}
+            height={height || undefined}
+            {width}
             {only_custom_metadata}
             {popup_metadata_width}
             {popup_metadata_height}
@@ -236,6 +238,8 @@
             i18n={gradio.i18n}
             upload={(...args) => gradio.client.upload(...args)}
             stream_handler={gradio.client?.stream}
+            height={height || undefined}
+            {width}
             {only_custom_metadata}
             {popup_metadata_width}
             {popup_metadata_height}
