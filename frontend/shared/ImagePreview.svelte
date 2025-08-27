@@ -348,7 +348,8 @@
 
     .metadata-value {
         padding: 0.5rem;
-        white-space: nowrap;
+        white-space: pre-wrap;
+        width: 55%;
         vertical-align: top;
     }
 
